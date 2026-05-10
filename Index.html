@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FH Austria Thesis Reviewer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f8f9fa;
+  --color-background-info:#e8f4fd;
+  --color-border-tertiary:#e0e0e0;
+  --color-border-secondary:#c8c8c8;
+  --color-text-primary:#1a1a1a;
+  --color-text-secondary:#6b6b6b;
+  --color-text-tertiary:#9b9b9b;
+  --border-radius-lg:12px;
+  --border-radius-md:8px;
+  --font-mono:'Courier New',monospace;
+}
+body{font-family:'Segoe UI',Lato,sans-serif;font-size:14px;background:#f0f2f5;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:24px}
+.wrap{display:grid;grid-template-columns:1fr 1fr;gap:0;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary);width:100%;max-width:1100px;box-shadow:0 4px 24px rgba(0,0,0,0.08)}
+.col{display:flex;flex-direction:column}
+.col-left{border-right:0.5px solid var(--color-border-tertiary)}
+.col-header{padding:14px 16px 10px;border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
+.col-title{font-size:13px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;gap:7px}
+.col-sub{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
+.col-body{padding:14px 16px;flex:1;overflow-y:auto;max-height:480px}
+.col-body::-webkit-scrollbar{width:3px}
+.col-body::-webkit-scrollbar-thumb{background:var(--color-border-secondary);border-radius:2px}
+
+.score-ring{display:flex;align-items:center;gap:14px;padding:10px 0 14px}
+.ring-label{font-size:11px;color:var(--color-text-secondary);margin-top:3px}
+.score-big{font-size:28px;font-weight:500;color:var(--color-text-primary)}
+.score-max{font-size:13px;color:var(--color-text-secondary)}
+.sub-scores{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px}
+.sub-score-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px}
+.ss-label{font-size:10px;color:var(--color-text-secondary);margin-bottom:3px}
+.ss-val{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.ss-bar{height:3px;background:var(--color-border-tertiary);border-radius:2px;margin-top:5px;overflow:hidden}
+.ss-fill{height:100%;border-radius:2px}
+.ok{background:#639922}.warn{background:#BA7517}.err{background:#E24B4A}
+
+.issue-list{display:flex;flex-direction:column;gap:6px}
+.issue{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;cursor:pointer;transition:background .15s}
+.issue:hover{background:var(--color-background-secondary)}
+.issue-top{display:flex;align-items:flex-start;gap:8px}
+.issue-icon{font-size:16px;margin-top:1px;flex-shrink:0}
+.issue-icon.e{color:#E24B4A}.issue-icon.w{color:#BA7517}.issue-icon.i{color:#378ADD}
+.issue-title{font-size:12.5px;font-weight:500;color:var(--color-text-primary);flex:1}
+.issue-loc{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.issue-detail{font-size:11.5px;color:var(--color-text-secondary);margin-top:7px;line-height:1.5;display:none;border-top:0.5px solid var(--color-border-tertiary);padding-top:7px}
+.issue-detail.open{display:block}
+.fix-btn{margin-top:7px;font-size:11.5px;padding:4px 10px;border-radius:var(--border-radius-md);cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary)}
+.fix-btn:hover{background:var(--color-border-tertiary)}
+
+.section-label{font-size:10px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--color-text-secondary);margin:14px 0 7px}
+.section-label:first-child{margin-top:0}
+
+.drop-zone{border:1.5px dashed var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:20px 16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:10px}
+.drop-zone:hover,.drop-zone.drag-over{border-color:#378ADD;background:var(--color-background-info)}
+.drop-icon{font-size:22px;color:var(--color-text-secondary);margin-bottom:6px}
+.drop-text{font-size:13px;color:var(--color-text-secondary);line-height:1.5}
+.drop-hint{font-size:11px;color:var(--color-text-tertiary);margin-top:4px}
+
+.ref-item{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:6px;font-size:12px}
+.ref-icon{font-size:16px;color:var(--color-text-secondary);margin-top:1px;flex-shrink:0}
+.ref-body{flex:1;min-width:0}
+.ref-title{font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ref-meta{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.ref-apa{font-size:11px;color:var(--color-text-secondary);margin-top:4px;line-height:1.5;font-style:italic}
+.ref-status{font-size:10px;padding:2px 7px;border-radius:10px;margin-left:auto;white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:1px}
+.rs-ok{background:#EAF3DE;color:#3B6D11}.rs-warn{background:#FAEEDA;color:#854F0B}.rs-missing{background:#FCEBEB;color:#A32D2D}
+
+.source-input-row{display:flex;gap:6px;margin-bottom:10px}
+.source-input-row input{flex:1;font-size:12.5px;padding:7px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);outline:none}
+.source-input-row input:focus{border-color:#378ADD}
+.source-input-row button{flex-shrink:0;font-size:12.5px;padding:0 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;background:var(--color-background-secondary)}
+
+.suggest-strip{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:9px 11px;margin-bottom:10px;font-size:12px}
+.suggest-label{font-size:10px;color:var(--color-text-secondary);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.suggest-chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:11px;padding:3px 9px;border-radius:10px;border:0.5px solid var(--color-border-secondary);color:var(--color-text-secondary);cursor:pointer;background:var(--color-background-primary);transition:all .15s}
+.chip:hover{border-color:#378ADD;color:#185FA5;background:#E6F1FB}
+.chip.selected{background:#E6F1FB;color:#185FA5;border-color:#378ADD}
+
+.unif-table{width:100%;border-collapse:collapse;font-size:12px}
+.unif-table th{font-size:10px;font-weight:500;color:var(--color-text-secondary);text-align:left;padding:5px 8px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.unif-table td{padding:7px 8px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:top;color:var(--color-text-primary)}
+.unif-table tr:last-child td{border-bottom:none}
+.unif-ok{color:#3B6D11;font-size:14px}.unif-warn{color:#BA7517;font-size:14px}.unif-err{color:#E24B4A;font-size:14px}
+.prop-name{font-weight:500}.prop-found{font-family:var(--font-mono);font-size:11px;color:var(--color-text-secondary)}.prop-req{font-family:var(--font-mono);font-size:11px;color:var(--color-text-primary)}
+
+.tab-bar{display:flex;border-bottom:0.5px solid var(--color-border-tertiary);padding:0 16px;background:var(--color-background-secondary)}
+.tab{padding:9px 12px;font-size:12.5px;color:var(--color-text-secondary);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-0.5px;transition:all .15s;white-space:nowrap}
+.tab.active{color:var(--color-text-primary);font-weight:500;border-bottom-color:#1a1a1a}
+.tab:hover:not(.active){color:var(--color-text-primary)}
+
+.action-row{display:flex;gap:7px;padding:10px 16px;border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);flex-wrap:wrap}
+.action-row button{font-size:12px;padding:6px 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:pointer;background:var(--color-background-primary);display:flex;align-items:center;gap:5px}
+.action-row button:hover{background:var(--color-background-secondary)}
+
+.pill{font-size:10.5px;padding:2px 8px;border-radius:10px;font-weight:500}
+.pill-err{background:#FCEBEB;color:#A32D2D}.pill-warn{background:#FAEEDA;color:#854F0B}.pill-ok{background:#EAF3DE;color:#3B6D11}
+
+button{font-family:'Segoe UI',Lato,sans-serif}
+textarea{font-family:'Segoe UI',Lato,sans-serif;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:8px;outline:none}
+textarea:focus{border-color:#378ADD}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- LEFT COLUMN -->
+  <div class="col col-left">
+    <div class="col-header">
+      <div class="col-title"><i class="ti ti-scan"></i> Review &amp; quality analysis</div>
+      <div class="col-sub">Austrian FH · Bachelor · APA 7th edition</div>
+    </div>
+    <div class="tab-bar" id="leftTabBar">
+      <div class="tab active" onclick="leftTab(this,'lt-overview')">Overview</div>
+      <div class="tab" onclick="leftTab(this,'lt-issues')">Issues <span class="pill pill-err" id="issCount">5</span></div>
+      <div class="tab" onclick="leftTab(this,'lt-uniformity')">Uniformity</div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="col-body" id="lt-overview">
+      <div class="score-ring">
+        <div>
+          <div class="score-big">74<span class="score-max">/100</span></div>
+          <div class="ring-label">Submission readiness</div>
+        </div>
+        <div style="flex:1">
+          <div class="ss-bar" style="height:6px;margin-top:0"><div class="ss-fill warn" style="width:74%"></div></div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-top:4px">Resolve all errors before submitting</div>
+        </div>
+      </div>
+      <div class="sub-scores">
+        <div class="sub-score-card"><div class="ss-label">Formatting</div><div class="ss-val">68%</div><div class="ss-bar"><div class="ss-fill warn" style="width:68%"></div></div></div>
+        <div class="sub-score-card"><div class="ss-label">Citation coverage</div><div class="ss-val">41%</div><div class="ss-bar"><div class="ss-fill err" style="width:41%"></div></div></div>
+        <div class="sub-score-card"><div class="ss-label">Academic language</div><div class="ss-val">89%</div><div class="ss-bar"><div class="ss-fill ok" style="width:89%"></div></div></div>
+        <div class="sub-score-card"><div class="ss-label">Structure</div><div class="ss-val">91%</div><div class="ss-bar"><div class="ss-fill ok" style="width:91%"></div></div></div>
+      </div>
+      <div class="section-label">What gets checked</div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><i class="ti ti-check" style="color:#639922;font-size:14px"></i> Font family &amp; size (Verdana 11pt)</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><i class="ti ti-check" style="color:#639922;font-size:14px"></i> Line spacing (1.5 body / 1.0 quotes)</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><i class="ti ti-check" style="color:#639922;font-size:14px"></i> Paragraph spacing (12pt after)</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><i class="ti ti-check" style="color:#639922;font-size:14px"></i> Heading hierarchy H1–H4</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><i class="ti ti-check" style="color:#639922;font-size:14px"></i> First-line indent (1.27 cm)</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><i class="ti ti-check" style="color:#639922;font-size:14px"></i> APA 7th in-text citations</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><i class="ti ti-check" style="color:#639922;font-size:14px"></i> Block quotes (40+ words)</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><i class="ti ti-check" style="color:#639922;font-size:14px"></i> Reference list completeness</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><i class="ti ti-check" style="color:#639922;font-size:14px"></i> Contractions &amp; informality</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary)"><i class="ti ti-check" style="color:#639922;font-size:14px"></i> Plagiarism &amp; paraphrase flags</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:7px;padding:5px 0"><i class="ti ti-check" style="color:#639922;font-size:14px"></i> Table/figure labels (APA 7th)</div>
+      </div>
+    </div>
+
+    <!-- ISSUES -->
+    <div class="col-body" id="lt-issues" style="display:none">
+      <div class="issue-list">
+        <div class="issue" onclick="toggleIssue(this)">
+          <div class="issue-top">
+            <i class="ti ti-x issue-icon e"></i>
+            <div style="flex:1">
+              <div class="issue-title">Missing citation — unattributed claim</div>
+              <div class="issue-loc">Chapter 1, paragraph 3 · <span class="pill pill-err">Error</span></div>
+            </div>
+          </div>
+          <div class="issue-detail">"Prior research has demonstrated that…" makes an empirical claim without any source. In APA 7th, every factual claim requires an in-text citation. Add (Author, Year) or paste the source URL into the source manager.</div>
+        </div>
+        <div class="issue" onclick="toggleIssue(this)">
+          <div class="issue-top">
+            <i class="ti ti-x issue-icon e"></i>
+            <div style="flex:1">
+              <div class="issue-title">Inconsistent heading capitalisation</div>
+              <div class="issue-loc">Chapter 2, section 2.3 · <span class="pill pill-err">Error</span></div>
+            </div>
+          </div>
+          <div class="issue-detail">H2 headings must use title case. Section 2.3 is in sentence case instead. H3 must be sentence case. Review and apply consistently throughout.</div>
+        </div>
+        <div class="issue" onclick="toggleIssue(this)">
+          <div class="issue-top">
+            <i class="ti ti-alert-triangle issue-icon w"></i>
+            <div style="flex:1">
+              <div class="issue-title">Abstract exceeds 250-word limit</div>
+              <div class="issue-loc">Abstract · 287 words found · <span class="pill pill-warn">Warning</span></div>
+            </div>
+          </div>
+          <div class="issue-detail">Austrian FH standard requires 150–250 words. Current abstract is 287 words. Trim by approx. 40 words while preserving research problem, method, results, and conclusion.</div>
+        </div>
+        <div class="issue" onclick="toggleIssue(this)">
+          <div class="issue-top">
+            <i class="ti ti-alert-triangle issue-icon w"></i>
+            <div style="flex:1">
+              <div class="issue-title">Direct quote without block formatting</div>
+              <div class="issue-loc">Chapter 3, paragraph 7 · <span class="pill pill-warn">Warning</span></div>
+            </div>
+          </div>
+          <div class="issue-detail">A quote of 53 words appears inline with quotation marks. APA 7th requires quotes of 40+ words to be formatted as indented block quotes (1.27 cm left indent, no quotation marks, citation after final punctuation).</div>
+        </div>
+        <div class="issue" onclick="toggleIssue(this)">
+          <div class="issue-top">
+            <i class="ti ti-info-circle issue-icon i"></i>
+            <div style="flex:1">
+              <div class="issue-title">Reference list entry incomplete</div>
+              <div class="issue-loc">References, entry 4 · <span class="pill" style="background:#E6F1FB;color:#185FA5">Info</span></div>
+            </div>
+          </div>
+          <div class="issue-detail">Source 4 (Müller, 2021) is missing the DOI. Where a DOI exists it must be formatted as a hyperlink: https://doi.org/xxxxx. Verify and add if available.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UNIFORMITY -->
+    <div class="col-body" id="lt-uniformity" style="display:none">
+      <div class="section-label">Document-wide property check</div>
+      <table class="unif-table">
+        <thead><tr><th>Property</th><th>Required</th><th>Found</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="prop-name">Body font</td><td class="prop-req">Verdana</td><td class="prop-found">Verdana ✓</td><td><i class="ti ti-circle-check unif-ok"></i></td></tr>
+          <tr><td class="prop-name">Body size</td><td class="prop-req">11pt</td><td class="prop-found">11pt ✓</td><td><i class="ti ti-circle-check unif-ok"></i></td></tr>
+          <tr><td class="prop-name">Margins</td><td class="prop-req">2.5 cm all</td><td class="prop-found">2.5 cm ✓</td><td><i class="ti ti-circle-check unif-ok"></i></td></tr>
+          <tr><td class="prop-name">Body spacing</td><td class="prop-req">1.5</td><td class="prop-found">1.4–1.6 mixed</td><td><i class="ti ti-alert-triangle unif-warn"></i></td></tr>
+          <tr><td class="prop-name">Para after</td><td class="prop-req">12pt</td><td class="prop-found">10pt (Ch. 3–4)</td><td><i class="ti ti-alert-triangle unif-warn"></i></td></tr>
+          <tr><td class="prop-name">First-line indent</td><td class="prop-req">1.27 cm</td><td class="prop-found">1.25 cm (minor)</td><td><i class="ti ti-alert-triangle unif-warn"></i></td></tr>
+          <tr><td class="prop-name">Footnote size</td><td class="prop-req">9pt</td><td class="prop-found">9pt ✓</td><td><i class="ti ti-circle-check unif-ok"></i></td></tr>
+          <tr><td class="prop-name">Page numbers</td><td class="prop-req">Bottom center</td><td class="prop-found">Bottom center ✓</td><td><i class="ti ti-circle-check unif-ok"></i></td></tr>
+          <tr><td class="prop-name">H1 style</td><td class="prop-req">14pt · caps · center</td><td class="prop-found">14pt · caps · center ✓</td><td><i class="ti ti-circle-check unif-ok"></i></td></tr>
+          <tr><td class="prop-name">H2 style</td><td class="prop-req">12pt · bold · left</td><td class="prop-found">mixed case (Ch. 2)</td><td><i class="ti ti-x unif-err"></i></td></tr>
+          <tr><td class="prop-name">Ref. spacing</td><td class="prop-req">Single · hang 1.27</td><td class="prop-found">Not verified</td><td><i class="ti ti-help unif-warn"></i></td></tr>
+          <tr><td class="prop-name">Page size</td><td class="prop-req">A4</td><td class="prop-found">A4 ✓</td><td><i class="ti ti-circle-check unif-ok"></i></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="action-row">
+      <button><i class="ti ti-upload"></i> Load thesis</button>
+      <button><i class="ti ti-brand-google-drive"></i> Drive</button>
+      <button style="margin-left:auto"><i class="ti ti-file-export"></i> Export report</button>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col">
+    <div class="col-header">
+      <div class="col-title"><i class="ti ti-books"></i> Source &amp; citation manager</div>
+      <div class="col-sub">APA 7th · auto-detect · web lookup</div>
+    </div>
+    <div class="tab-bar" id="rightTabBar">
+      <div class="tab active" onclick="rightTab(this,'rt-library')">Library <span style="font-size:10px;color:var(--color-text-secondary);margin-left:3px">3</span></div>
+      <div class="tab" onclick="rightTab(this,'rt-add')">Add source</div>
+      <div class="tab" onclick="rightTab(this,'rt-suggest')">Auto-detect</div>
+    </div>
+
+    <!-- LIBRARY -->
+    <div class="col-body" id="rt-library">
+      <div class="section-label">In library</div>
+      <div class="ref-item">
+        <i class="ti ti-article ref-icon"></i>
+        <div class="ref-body">
+          <div class="ref-title">Digital transformation in SMEs</div>
+          <div class="ref-meta">Bauer &amp; Wiesinger · 2022 · Journal of Innovation Management</div>
+          <div class="ref-apa">Bauer, K., &amp; Wiesinger, M. (2022). Digital transformation in small and medium enterprises. <em>Journal of Innovation Management</em>, <em>10</em>(2), 44–61. https://doi.org/10.24840/2183-0606_010.002_0004</div>
+        </div>
+        <span class="ref-status rs-ok">Cited ×3</span>
+      </div>
+      <div class="ref-item">
+        <i class="ti ti-book ref-icon"></i>
+        <div class="ref-body">
+          <div class="ref-title">Qualitative Forschungsmethoden</div>
+          <div class="ref-meta">Mayring · 2016 · Beltz Verlag</div>
+          <div class="ref-apa">Mayring, P. (2016). <em>Einführung in die qualitative sozialforschung</em> (6th ed.). Beltz Verlag.</div>
+        </div>
+        <span class="ref-status rs-ok">Cited ×1</span>
+      </div>
+      <div class="ref-item">
+        <i class="ti ti-world ref-icon"></i>
+        <div class="ref-body">
+          <div class="ref-title">Österreichischer Strukturbericht 2023</div>
+          <div class="ref-meta">BMAW · 2023 · bmaw.gv.at</div>
+          <div class="ref-apa">Bundesministerium für Arbeit und Wirtschaft. (2023). <em>Österreichischer strukturbericht 2023</em>. BMAW. https://www.bmaw.gv.at/strukturbericht</div>
+        </div>
+        <span class="ref-status rs-warn">Uncited</span>
+      </div>
+      <div class="section-label" style="margin-top:14px">Missing from library</div>
+      <div class="ref-item" style="border-style:dashed;opacity:.75">
+        <i class="ti ti-alert-triangle ref-icon" style="color:#E24B4A"></i>
+        <div class="ref-body">
+          <div class="ref-title" style="color:#A32D2D">Unresolved: (Müller, 2021)</div>
+          <div class="ref-meta">Cited in Ch. 2 but not in library — DOI missing</div>
+        </div>
+        <span class="ref-status rs-missing">Incomplete</span>
+      </div>
+    </div>
+
+    <!-- ADD SOURCE -->
+    <div class="col-body" id="rt-add" style="display:none">
+      <div class="section-label">Drop a source</div>
+      <div class="drop-zone" id="dropZone" ondragover="ev(event)" ondragleave="dl()" ondrop="dp(event)">
+        <div class="drop-icon"><i class="ti ti-drag-drop"></i></div>
+        <div class="drop-text">Drop a PDF, paste a URL, or type a DOI</div>
+        <div class="drop-hint">Supported: DOI · URL · ISBN · BibTeX · PDF · plain text</div>
+      </div>
+      <div class="section-label">Or enter manually</div>
+      <div class="source-input-row">
+        <input type="text" id="srcInput" placeholder="https://doi.org/… or paste any URL">
+        <button onclick="addSrc()">Look up</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">
+        <button style="font-size:12px;padding:7px;cursor:pointer;border-radius:var(--border-radius-md);text-align:left;display:flex;align-items:center;gap:6px;border:0.5px solid var(--color-border-secondary)"><i class="ti ti-article"></i> Journal article</button>
+        <button style="font-size:12px;padding:7px;cursor:pointer;border-radius:var(--border-radius-md);text-align:left;display:flex;align-items:center;gap:6px;border:0.5px solid var(--color-border-secondary)"><i class="ti ti-book"></i> Book</button>
+        <button style="font-size:12px;padding:7px;cursor:pointer;border-radius:var(--border-radius-md);text-align:left;display:flex;align-items:center;gap:6px;border:0.5px solid var(--color-border-secondary)"><i class="ti ti-bookmark"></i> Book chapter</button>
+        <button style="font-size:12px;padding:7px;cursor:pointer;border-radius:var(--border-radius-md);text-align:left;display:flex;align-items:center;gap:6px;border:0.5px solid var(--color-border-secondary)"><i class="ti ti-world"></i> Website / report</button>
+        <button style="font-size:12px;padding:7px;cursor:pointer;border-radius:var(--border-radius-md);text-align:left;display:flex;align-items:center;gap:6px;border:0.5px solid var(--color-border-secondary)"><i class="ti ti-school"></i> Thesis / diss.</button>
+        <button style="font-size:12px;padding:7px;cursor:pointer;border-radius:var(--border-radius-md);text-align:left;display:flex;align-items:center;gap:6px;border:0.5px solid var(--color-border-secondary)"><i class="ti ti-building"></i> Gov. / inst. report</button>
+      </div>
+      <div class="section-label">Paste BibTeX</div>
+      <textarea style="width:100%;height:80px;font-size:11.5px;font-family:var(--font-mono);resize:vertical" placeholder="@article{key, author={...}, title={...}, ...}"></textarea>
+      <button style="width:100%;margin-top:6px;font-size:12px;padding:7px;cursor:pointer;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary)">Convert BibTeX to APA</button>
+    </div>
+
+    <!-- AUTO-DETECT -->
+    <div class="col-body" id="rt-suggest" style="display:none">
+      <div class="section-label">Claims detected in your text</div>
+      <div class="suggest-strip">
+        <div class="suggest-label"><i class="ti ti-sparkles" style="font-size:13px"></i> Uncited empirical claim</div>
+        <div style="font-size:12px;color:var(--color-text-primary);margin-bottom:7px;line-height:1.5">"The majority of Austrian SMEs have accelerated their digital transformation since 2020…"</div>
+        <div class="suggest-chips">
+          <span class="chip" onclick="pickChip(this)">Statistik Austria 2023</span>
+          <span class="chip" onclick="pickChip(this)">WKO Digitalisierungsbericht 2022</span>
+          <span class="chip" onclick="pickChip(this)">OECD SME Outlook 2023</span>
+        </div>
+      </div>
+      <div class="suggest-strip">
+        <div class="suggest-label"><i class="ti ti-sparkles" style="font-size:13px"></i> Uncited methodological claim</div>
+        <div style="font-size:12px;color:var(--color-text-primary);margin-bottom:7px;line-height:1.5">"Qualitative content analysis allows researchers to systematically interpret meaning…"</div>
+        <div class="suggest-chips">
+          <span class="chip" onclick="pickChip(this)">Mayring 2015</span>
+          <span class="chip" onclick="pickChip(this)">Kuckartz 2018</span>
+          <span class="chip" onclick="pickChip(this)">Schreier 2012</span>
+        </div>
+      </div>
+      <div class="suggest-strip">
+        <div class="suggest-label"><i class="ti ti-sparkles" style="font-size:13px"></i> Definition without source</div>
+        <div style="font-size:12px;color:var(--color-text-primary);margin-bottom:7px;line-height:1.5">"Digital transformation is defined as the integration of digital technology into all areas of business…"</div>
+        <div class="suggest-chips">
+          <span class="chip" onclick="pickChip(this)">Westerman et al. 2014</span>
+          <span class="chip" onclick="pickChip(this)">Matt et al. 2015</span>
+          <span class="chip" onclick="pickChip(this)">Custom source...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <span style="font-size:11px;color:var(--color-text-secondary);align-self:center">3 sources · 2 cited · 1 uncited · 1 missing</span>
+      <button style="margin-left:auto"><i class="ti ti-download"></i> Export APA list</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function leftTab(el,id){
+  document.querySelectorAll('#leftTabBar .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['lt-overview','lt-issues','lt-uniformity'].forEach(p=>{
+    const d=document.getElementById(p);if(d)d.style.display=p===id?'block':'none';
+  });
+}
+function rightTab(el,id){
+  document.querySelectorAll('#rightTabBar .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['rt-library','rt-add','rt-suggest'].forEach(p=>{
+    const d=document.getElementById(p);if(d)d.style.display=p===id?'block':'none';
+  });
+}
+function toggleIssue(el){
+  const d=el.querySelector('.issue-detail');
+  if(d)d.classList.toggle('open');
+}
+function ev(e){e.preventDefault();const z=document.getElementById('dropZone');if(z)z.classList.add('drag-over')}
+function dl(){const z=document.getElementById('dropZone');if(z)z.classList.remove('drag-over')}
+function dp(e){
+  e.preventDefault();dl();
+  const f=e.dataTransfer.files[0];
+  const txt=e.dataTransfer.getData('text');
+  if(f)alert('File dropped: '+f.name+'\nIn the live version this would extract and format the APA citation automatically.');
+  else if(txt)alert('Text dropped:\n'+txt+'\nIn the live version this would be converted to APA 7th automatically.');
+}
+function addSrc(){
+  const v=document.getElementById('srcInput').value.trim();
+  if(!v)return;
+  alert('Looking up: '+v+'\nIn the live version this fetches metadata and generates an APA 7th reference entry automatically.');
+  document.getElementById('srcInput').value='';
+}
+function pickChip(el){
+  el.classList.toggle('selected');
+}
+</script>
+</body>
+</html>
